@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>百度地图定位示例</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+        .local {
+            color: #3d3d49;
+            margin: 50px 45%;
+        }
+
+    </style>
+    <script src="https://api.map.baidu.com/api?v=3.0&ak=Zi72lglcacxrzacEz9HyjQrdcJBDeMST"></script>
+</head>
+<body>
+<h1>百度地图定位</h1>
+<div id="map"></div>
+<button onclick="getCurrentLocation()" class="local">获取当前位置</button>
+
+<script>
+    // 初始化地图
+    var map = new BMap.Map("map");
+    var point = new BMap.Point(116.404, 39.915); // 默认中心点为北京市
+    map.centerAndZoom(point, 15);
+
+    // 添加缩放控件
+    map.addControl(new BMap.NavigationControl());
+
+    // 获取当前位置
+    function getCurrentLocation() {
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r) {
+            if(this.getStatus() == BMAP_STATUS_SUCCESS) {
+                var mk = new BMap.Marker(r.point);
+                map.addOverlay(mk);
+                map.panTo(r.point);
+
+                // 进行逆地理编码
+                var geoc = new BMap.Geocoder();
+                geoc.getLocation(r.point, function(rs) {
+                    var addComp = rs.addressComponents;
+                    var address = '详细地址：' + addComp.province + ', ' + addComp.city + ', ' + addComp.district + ', ' + addComp.street + ', ' + addComp.streetNumber;
+                    alert(address);
+                });
+            } else {
+                alert('获取位置失败：' + this.getStatus());
+            }
+        }, {enableHighAccuracy: true});
+    }
+</script>
+</body>
+</html>

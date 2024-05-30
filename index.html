@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>百度地图定位示例</title>
+    <title>百度地图定位</title>
     <style>
         #map {
             width: 100%;
@@ -42,9 +42,10 @@
                 // 进行逆地理编码
                 var geoc = new BMap.Geocoder();
                 geoc.getLocation(r.point, function(rs) {
-                    var addComp = rs.addressComponents;
-                    var address = '详细地址：' + addComp.province + ', ' + addComp.city + ', ' + addComp.district + ', ' + addComp.street + ', ' + addComp.streetNumber;
-                    alert(address);
+                    var address = rs.address;
+                    var detail = rs.content.address_detail;
+                    var des = '详细地址：' + detail.country + address;
+                    alert(des);
                 });
             } else {
                 alert('获取位置失败：' + this.getStatus());

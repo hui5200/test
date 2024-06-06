@@ -1,10 +1,23 @@
+import { getRequest, postRequest } from './api.js';
+
 function getTime() {
     const now = new Date();
-    return now.toLocaleTimeString({
+    const locale = navigator.language || 'zh-CN';
+    return now.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         hour12: false
+    });
+}
+
+function getDate() {
+    const now = new Date();
+    const locale = navigator.language || 'zh-CN';
+    return now.toLocaleDateString(locale, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
     });
 }
 function updateClock() {
@@ -14,19 +27,29 @@ function updateClock() {
 async function getAsyncCurrentLocation() {
     document.getElementById('currentAdd').innerText = await getCurrentLocation();
 }
+// 假设后端接口返回的数据结构
+async function initClockInDetail() {
+    try {
+        // const data = await getRequest('`https://your-backend-api.com/getClockInDetails', { id: id });
+        const data = [
+            { "time": "09:00:00", "address": "初始化历史打卡地址1" },
+            { "time": "15:23:00", "address": "初始化历史打卡地址2" }
+        ]
 
-function initClockInDetail() {
-    for (let i = 0; i < 3; i++) {
-        const timeDiv = document.createElement('div');
-        timeDiv.innerText = getTime();
-        const locationDiv = document.createElement('div');
-        locationDiv.innerText = "初始化测试地址" + i;
-        addClockInDetail(timeDiv, locationDiv);
+        data.forEach((item, index) => {
+            const timeDiv = document.createElement('div');
+            timeDiv.innerText = item.time;
+            const locationDiv = document.createElement('div');
+            locationDiv.innerText = item.address;
+            addClockInDetail(timeDiv, locationDiv);
+        });
+    } catch (error) {
+        console.error('初始化打卡详情失败:', error);
     }
 }
 
 async function clockIn() {
-    const formattedTime = getTime();
+    const formattedTime = getDate() + ' ' + getTime();
 
     const clockElement = document.getElementById('clock');
     clockElement.classList.add('clicked');
@@ -40,7 +63,21 @@ async function clockIn() {
     const locationDiv = document.createElement('div');
     locationDiv.innerText = await getCurrentLocation();
 
+    // await recordClockInData('测试', '测试', formattedTime, location);
     addClockInDetail(timeDiv, locationDiv);
+}
+
+async function recordClockInData(name, email, time, location) {
+    try {
+        const response = await postRequest('https://your-backend-api.com/getClockInDetails', {
+            name: name,
+            email: email,
+            time: time,
+            location: location
+        });
+    } catch (error) {
+        console.error('记录打卡数据失败:', error);
+    }
 }
 
 function addClockInDetail(timeDiv, locationDiv) {
@@ -64,12 +101,12 @@ function addClockInDetail(timeDiv, locationDiv) {
 // 获取当前位置
 function getCurrentLocation() {
     return new Promise((resolve, reject) => {
-        var geolocation = new BMap.Geolocation();
-        geolocation.getCurrentPosition(function(r) {
-            if(this.getStatus() == BMAP_STATUS_SUCCESS) {
+        const geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function (r) {
+            if (this.getStatus() == BMAP_STATUS_SUCCESS) {
                 // 进行逆地理编码
                 var geoc = new BMap.Geocoder();
-                geoc.getLocation(r.point, function(rs) {
+                geoc.getLocation(r.point, function (rs) {
                     var detail = rs.addressComponents;
                     var des = (isNaN(detail.country) ? '' : detail.country + "_") + rs.address;
                     resolve(des);
@@ -77,6 +114,16 @@ function getCurrentLocation() {
             } else {
                 reject('获取位置失败：' + this.getStatus());
             }
-        }, {enableHighAccuracy: true});
+        }, { enableHighAccuracy: true });
     });
 }
+
+// 页面加载完成后执行初始化
+window.addEventListener('DOMContentLoaded', () => {
+    setInterval(updateClock, 1000);
+    getAsyncCurrentLocation();
+    initClockInDetail();
+    updateClock();
+    // 绑定 clockIn 函数到 clock 元素
+    document.getElementById('clock').onclick = clockIn;
+});

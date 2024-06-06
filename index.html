@@ -6,12 +6,12 @@
     <title>考勤打卡</title>
     <script src="https://api.map.baidu.com/api?v=3.0&ak=Zi72lglcacxrzacEz9HyjQrdcJBDeMST"></script>
     <link rel="stylesheet" href="./css/sign_in.css">
-    <script src="./js/sign_in.js"></script>
+    <script type="module" src="./js/sign_in.js"></script>
 </head>
 <body>
 <div class="container">
     <h1>考勤打卡</h1>
-    <div class="clock" id="clock" onclick="clockIn()"></div>
+    <div class="clock" id="clock"></div>
 </div>
 <div class="location">
     <img src="https://img.icons8.com/ios-filled/50/000000/marker.png" alt="location">
@@ -20,19 +20,7 @@
 <div class="details-container">
     <div class="details">
         <h2>打卡详情</h2>
-        <!-- <div class="record">
-            <img src="https://img.icons8.com/ios-filled/50/000000/clock.png" alt="clock">
-            <div class="time">14:23</div>
-            <div class="location">中国广东省一座大厦6楼606</div>
-        </div> -->
     </div>
 </div>
-
-<script>
-    setInterval(updateClock, 1000);
-    getAsyncCurrentLocation();
-    initClockInDetail();
-    updateClock();
-</script>
 </body>
 </html>

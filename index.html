@@ -1,57 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <title>百度地图定位</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤打卡</title>
     <style>
-        #map {
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 105vh;
+            box-sizing: border-box;
+        }
+        .container {
             width: 100%;
-            height: 500px;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
         }
-        .local {
-            color: #3d3d49;
-            margin: 50px 45%;
+        h1 {
+            margin: 20px 0;
+            color: #666;
         }
-
+        .clock {
+            width: 150px;
+            height: 150px;
+            border: 1px solid #ffc107;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            font-size: 1.5em;
+            color: #fff;
+            background-color: #ffc107;
+            cursor: pointer;
+            transition: background-color 0.5s;
+        }
+        .clock.clicked {
+            background-color: #28a745;
+        }
+        .location {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+        .location img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        .details-container {
+            flex: 1;
+            width: 100%;
+            overflow-y: auto;
+            background-color: #f0f0f0;
+        }
+        .details {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .details h2 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #666;
+        }
+        .details .record {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .details .record img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        .details .record .time {
+            flex: 1;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .details .record .location {
+            color: #888;
+            font-size: 0.9em;
+        }
     </style>
     <script src="https://api.map.baidu.com/api?v=3.0&ak=Zi72lglcacxrzacEz9HyjQrdcJBDeMST"></script>
 </head>
 <body>
-<h1>百度地图定位</h1>
-<div id="map"></div>
-<button onclick="getCurrentLocation()" class="local">获取当前位置</button>
+<div class="container">
+    <h1>考勤打卡</h1>
+    <div class="clock" id="clock" onclick="clockIn()"></div>
+</div>
+<div class="details-container">
+    <div class="details">
+        <h2>打卡详情</h2>
+        <!-- <div class="record">
+            <img src="https://img.icons8.com/ios-filled/50/000000/clock.png" alt="clock">
+            <div class="time">14:23</div>
+            <div class="location">中国广东省一座大厦6楼606</div>
+        </div> -->
+    </div>
+</div>
 
 <script>
-    // 初始化地图
-    var map = new BMap.Map("map");
-    var point = new BMap.Point(116.404, 39.915); // 默认中心点为北京市
-    map.centerAndZoom(point, 15);
+    function updateClock() {
+        const now = new Date();
+        const formattedTime = now.toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        document.getElementById('clock').innerText = formattedTime;
+    }
 
-    // 添加缩放控件
-    map.addControl(new BMap.NavigationControl());
+    async function clockIn() {
+        const now = new Date();
+        const formattedTime = now.toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+
+        const clockElement = document.getElementById('clock');
+        clockElement.classList.add('clicked');
+        setTimeout(() => {
+            clockElement.classList.remove('clicked');
+        }, 2000);
+
+        const details = document.querySelector('.details');
+
+        const newRecord = document.createElement('div');
+        newRecord.classList.add('record');
+
+        const clockIcon = document.createElement('img');
+        clockIcon.src = 'https://img.icons8.com/ios-filled/50/000000/clock.png';
+        clockIcon.alt = 'clock';
+
+        const timeDiv = document.createElement('div');
+        timeDiv.classList.add('time');
+        timeDiv.innerText = formattedTime;
+
+        const address = await getCurrentLocation();
+        const locationDiv = document.createElement('div');
+        locationDiv.classList.add('location');
+        locationDiv.innerText = address;
+
+        newRecord.appendChild(clockIcon);
+        newRecord.appendChild(timeDiv);
+        newRecord.appendChild(locationDiv);
+
+        details.appendChild(newRecord);
+    }
 
     // 获取当前位置
     function getCurrentLocation() {
-        var geolocation = new BMap.Geolocation();
-        geolocation.getCurrentPosition(function(r) {
-            if(this.getStatus() == BMAP_STATUS_SUCCESS) {
-                var mk = new BMap.Marker(r.point);
-                map.addOverlay(mk);
-                map.panTo(r.point);
-
-                // 进行逆地理编码
-                var geoc = new BMap.Geocoder();
-                geoc.getLocation(r.point, function(rs) {
-                    var address = rs.address;
-                    var detail = rs.content.address_detail;
-                    var des = '详细地址：' + detail.country + address;
-                    alert(des);
-                });
-            } else {
-                alert('获取位置失败：' + this.getStatus());
-            }
-        }, {enableHighAccuracy: true});
+        return new Promise((resolve, reject) => {
+            var geolocation = new BMap.Geolocation();
+            geolocation.getCurrentPosition(function(r) {
+                if(this.getStatus() == BMAP_STATUS_SUCCESS) {
+                    // 进行逆地理编码
+                    var geoc = new BMap.Geocoder();
+                    geoc.getLocation(r.point, function(rs) {
+                        var detail = rs.addressComponents;
+                        var des = (isNaN(detail.country) ? '' : detail.country + "_") + rs.address;
+                        resolve(des);
+                    });
+                } else {
+                    reject('获取位置失败：' + this.getStatus());
+                }
+            }, {enableHighAccuracy: true});
+        });
     }
+
+    setInterval(updateClock, 1000);
+    updateClock();
 </script>
 </body>
 </html>

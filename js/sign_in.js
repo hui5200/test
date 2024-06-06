@@ -1,5 +1,8 @@
 import { getRequest, postRequest } from './api.js';
 
+
+const urlParams = new URLSearchParams(window.location.search);
+const code = urlParams.get('code');
 function getTime() {
     const now = new Date();
     const locale = navigator.language || 'zh-CN';
@@ -30,7 +33,7 @@ async function getAsyncCurrentLocation() {
 // 假设后端接口返回的数据结构
 async function initClockInDetail() {
     try {
-        // const data = await getRequest('`https://your-backend-api.com/getClockInDetails', { id: id });
+        // const data = await getRequest('`https://your-backend-api.com/getClockInDetails', { code: code });
         const data = [
             { "time": "2024/06/06 09:00:00", "address": "初始化历史打卡地址1" },
             { "time": "2024/06/06 15:23:00", "address": "初始化历史打卡地址2" }
@@ -62,16 +65,14 @@ async function clockIn() {
 
     const locationDiv = document.createElement('div');
     locationDiv.innerText = await getCurrentLocation();
-
-    // await recordClockInData('测试', '测试', formattedTime, location);
+    // await recordClockInData(code, formattedTime, location);
     addClockInDetail(timeDiv, locationDiv);
 }
 
-async function recordClockInData(name, email, time, location) {
+async function recordClockInData(code, time, location) {
     try {
         const response = await postRequest('https://your-backend-api.com/getClockInDetails', {
-            name: name,
-            email: email,
+            code: code,
             time: time,
             location: location
         });

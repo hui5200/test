@@ -15,6 +15,16 @@ async function getAsyncCurrentLocation() {
     document.getElementById('currentAdd').innerText = await getCurrentLocation();
 }
 
+function initClockInDetail() {
+    for (let i = 0; i < 3; i++) {
+        const timeDiv = document.createElement('div');
+        timeDiv.innerText = getTime();
+        const locationDiv = document.createElement('div');
+        locationDiv.innerText = "初始化测试地址" + i;
+        addClockInDetail(timeDiv, locationDiv);
+    }
+}
+
 async function clockIn() {
     const formattedTime = getTime();
 
@@ -24,28 +34,30 @@ async function clockIn() {
         clockElement.classList.remove('clicked');
     }, 2000);
 
-    const details = document.querySelector('.details');
+    const timeDiv = document.createElement('div');
+    timeDiv.innerText = formattedTime;
 
+    const locationDiv = document.createElement('div');
+    locationDiv.innerText = await getCurrentLocation();
+
+    addClockInDetail(timeDiv, locationDiv);
+}
+
+function addClockInDetail(timeDiv, locationDiv) {
+    const details = document.querySelector('.details');
     const newRecord = document.createElement('div');
     newRecord.classList.add('record');
 
     const clockIcon = document.createElement('img');
     clockIcon.src = 'https://img.icons8.com/ios-filled/50/000000/clock.png';
     clockIcon.alt = 'clock';
-
-    const timeDiv = document.createElement('div');
-    timeDiv.classList.add('time');
-    timeDiv.innerText = formattedTime;
-
-    const address = await getCurrentLocation();
-    const locationDiv = document.createElement('div');
-    locationDiv.classList.add('location');
-    locationDiv.innerText = address;
-
     newRecord.appendChild(clockIcon);
-    newRecord.appendChild(timeDiv);
-    newRecord.appendChild(locationDiv);
 
+    timeDiv.classList.add('time');
+    newRecord.appendChild(timeDiv);
+
+    locationDiv.classList.add('location');
+    newRecord.appendChild(locationDiv);
     details.appendChild(newRecord);
 }
 

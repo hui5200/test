@@ -32,8 +32,8 @@ async function initClockInDetail() {
     try {
         // const data = await getRequest('`https://your-backend-api.com/getClockInDetails', { id: id });
         const data = [
-            { "time": "09:00:00", "address": "初始化历史打卡地址1" },
-            { "time": "15:23:00", "address": "初始化历史打卡地址2" }
+            { "time": "2024/06/06 09:00:00", "address": "初始化历史打卡地址1" },
+            { "time": "2024/06/06 15:23:00", "address": "初始化历史打卡地址2" }
         ]
 
         data.forEach((item, index) => {

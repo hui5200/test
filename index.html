@@ -120,30 +120,26 @@
 </div>
 
 <script>
-    function updateClock() {
+
+    function getTime() {
         const now = new Date();
-        const formattedTime = now.toLocaleTimeString('zh-CN', {
+        return now.toLocaleTimeString('zh-CN', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
             hour12: false
         });
-        document.getElementById('clock').innerText = formattedTime;
+    }
+    function updateClock() {
+        document.getElementById('clock').innerText = getTime();
     }
 
     async function getAsyncCurrentLocation() {
-        const addree = await getCurrentLocation();
-        document.getElementById('currentAdd').innerText = addree;
+        document.getElementById('currentAdd').innerText = await getCurrentLocation();
     }
 
     async function clockIn() {
-        const now = new Date();
-        const formattedTime = now.toLocaleTimeString('zh-CN', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-        });
+        const formattedTime = getTime();
 
         const clockElement = document.getElementById('clock');
         clockElement.classList.add('clicked');

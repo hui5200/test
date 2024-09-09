@@ -102,20 +102,35 @@ function addClockInDetail(timeDiv, locationDiv) {
 // 获取当前位置
 function getCurrentLocation() {
     return new Promise((resolve, reject) => {
-        const geolocation = new BMap.Geolocation();
-        geolocation.getCurrentPosition(function (r) {
-            if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-                // 进行逆地理编码
-                var geoc = new BMap.Geocoder();
-                geoc.getLocation(r.point, function (rs) {
-                    var detail = rs.addressComponents;
-                    var des = (isNaN(detail.country) ? '' : detail.country + "_") + rs.address;
-                    resolve(des);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const latlng = new google.maps.LatLng(lat, lng);
+
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ 'location': latlng }, (results, status) => {
+                    if (status === google.maps.GeocoderStatus.OK) {
+                        if (results[0]) {
+                            console.log(results[0]);
+                            const addressComponents = results[0].address_components;
+                            const country = addressComponents.find(component => component.types.includes('country'))?.long_name || '';
+                            const address = results[0].formatted_address;
+                            const des = (isNaN(country) ? '' : country + "_") + address;
+                            resolve(des);
+                        } else {
+                            reject('No results found');
+                        }
+                    } else {
+                        reject('Geocoder failed due to: ' + status);
+                    }
                 });
-            } else {
-                reject('获取位置失败：' + this.getStatus());
-            }
-        }, { enableHighAccuracy: true });
+            }, error => {
+                reject('获取位置失败：' + error.message);
+            }, { enableHighAccuracy: true });
+        } else {
+            reject('Geolocation is not supported by this browser.');
+        }
     });
 }
 
